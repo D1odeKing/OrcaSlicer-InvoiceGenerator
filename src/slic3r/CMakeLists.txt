@@ -254,6 +254,8 @@ set(SLIC3R_GUI_SOURCES
     GUI/ImGuiWrapper.hpp
     GUI/IMSlider.cpp
     GUI/IMSlider.hpp
+    GUI/InvoiceDialog.cpp
+    GUI/InvoiceDialog.hpp
     GUI/DeviceErrorDialog.hpp
     GUI/DeviceErrorDialog.cpp
     GUI/IMToolbar.cpp

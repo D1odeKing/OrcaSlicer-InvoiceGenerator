@@ -46,6 +46,7 @@
 #include "Widgets/ProgressDialog.hpp"
 #include "BindDialog.hpp"
 #include "../Utils/MacDarkMode.hpp"
+#include "InvoiceDialog.hpp"
 
 #include <fstream>
 #include <string_view>
@@ -1944,6 +1945,32 @@ wxBoxSizer* MainFrame::create_side_tools()
         }
     );
 
+    // Invoice Button
+    auto invoice_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTRANSPARENT_WINDOW);
+    m_invoice_btn = new SideButton(invoice_panel, _L("Invoice"), "");
+    m_invoice_btn->SetCornerRadius(FromDIP(12));
+    m_invoice_btn->SetFont(Label::Body_13);
+    m_invoice_btn->SetMinSize(wxSize(FromDIP(80), FromDIP(36)));
+    m_invoice_btn->SetBackgroundColor(wxColour(0, 150, 136)); // Teal color to differentiate
+    m_invoice_btn->Enable(false); // Disabled until slicing completes
+    
+    auto invoice_sizer = new wxBoxSizer(wxHORIZONTAL);
+    invoice_sizer->Add(m_invoice_btn, 0, wxALIGN_CENTER_VERTICAL);
+    invoice_panel->SetSizer(invoice_sizer);
+    
+    m_invoice_btn->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+        // Get print statistics from current plate
+        PartPlateList& plate_list = m_plater->get_partplate_list();
+        const Print& print = plate_list.get_current_fff_print();
+        const PrintStatistics* stats = &print.print_statistics();
+        
+        InvoiceDialog dlg(this, stats);
+        dlg.ShowModal();
+    });
+    
+    sizer->Add(FromDIP(15), 0, 0, 0, 0);
+    sizer->Add(invoice_panel);
+    
     /*
     Button * aux_btn = new Button(this, _L("Auxiliary"));
     aux_btn->SetBackgroundColour(0x3B4446);
@@ -2172,6 +2199,12 @@ void MainFrame::update_slice_print_status(SlicePrintEventType event, bool can_sl
     m_slice_btn->Enable(enable_slice);
     m_slice_enable = enable_slice;
     m_print_enable = enable_print;
+    
+    // Enable Invoice button when print is ready (slicing complete with valid results)
+    if (m_invoice_btn) {
+        bool enable_invoice = enable_print; // Invoice requires sliced data, same condition as print
+        m_invoice_btn->Enable(enable_invoice);
+    }
 
     if (!old_slice_status && enable_slice)
         m_plater->reset_check_status();
@@ -2205,6 +2238,8 @@ void MainFrame::on_dpi_changed(const wxRect& suggested_rect)
     m_print_btn->Rescale();
     m_slice_option_btn->Rescale();
     m_print_option_btn->Rescale();
+    if (m_invoice_btn)
+        m_invoice_btn->Rescale();
 
     // update Plater
     wxGetApp().plater()->msw_rescale();

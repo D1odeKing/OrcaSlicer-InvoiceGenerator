@@ -401,6 +401,7 @@ public:
     SideButton* m_slice_option_btn{ nullptr };
     SideButton* m_print_btn{ nullptr };
     SideButton* m_print_option_btn{ nullptr };
+    SideButton* m_invoice_btn{ nullptr };
 
     SidePopup*  m_slice_option_pop_up{ nullptr };
 
